@@ -64,7 +64,7 @@ st.metric("Total a pagar", f"R$ {total:,.2f}")
 # Função para gerar PDF estilizado
 if st.button("📄 Gerar PDF do orçamento"):
     try:
-        logo_path = "Imagem do WhatsApp de 2025-07-01 à(s) 10.03.27_5a119f75.jpg"
+        logo_path = "logo.jpg"
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
             c = canvas.Canvas(tmpfile.name, pagesize=A4)
             width, height = A4
