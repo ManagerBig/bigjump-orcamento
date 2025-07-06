@@ -1,0 +1,72 @@
+# Gerador de Orçamento de Festa - Big Jump (Web)
+# Requisitos: streamlit, pandas
+# Execute com: streamlit run app.py
+
+try:
+    import streamlit as st
+    import pandas as pd
+except ModuleNotFoundError as e:
+    import sys
+    sys.exit("Erro: bibliotecas necessárias não estão instaladas. Use 'pip install streamlit pandas' e tente novamente.")
+
+st.set_page_config(page_title="Orçamento de Festa - Big Jump", layout="centered")
+st.title("🎉 Gerador de Orçamento de Festa - Big Jump")
+
+st.sidebar.header("Dados da Festa")
+
+# Entradas do usuário
+num_party = st.sidebar.number_input("Convidados - Party Room", min_value=0, value=30)
+valor_party = st.sidebar.number_input("Valor por Party Room (R$)", min_value=0, value=160)
+
+num_jumper = st.sidebar.number_input("Convidados - Jumper Guest", min_value=0, value=20)
+valor_jumper = st.sidebar.number_input("Valor por Jumper Guest (R$)", min_value=0, value=135)
+
+st.sidebar.markdown("---")
+
+# Itens do buffet fixos
+buffet_itens = [
+    {"item": "Salgadinhos", "qtde": 1.875, "custo": 1.80},
+    {"item": "Soda", "qtde": 8.5, "custo": 8.50},
+    {"item": "Juice", "qtde": 6.5, "custo": 6.50},
+    {"item": "Water", "qtde": 1, "custo": 1.00},
+    {"item": "Cake", "qtde": 6, "custo": 6.00},
+    {"item": "Brown/Donut", "qtde": 8, "custo": 8.00},
+    {"item": "Sweets", "qtde": 0.85, "custo": 0.85},
+]
+
+buffet_df = pd.DataFrame(buffet_itens)
+buffet_df["Total (R$)"] = buffet_df["qtde"] * buffet_df["custo"]
+total_buffet = buffet_df["Total (R$)"].sum()
+
+# Custos extras fixos
+extras = {
+    "Buffet Fee": 280.00,
+    "Garçom": 110.00,
+    "Decoração": 280.00,
+    "Sala + Fotógrafo + Animador": 700.00
+}
+total_extras = sum(extras.values())
+total_geral = total_buffet + total_extras
+
+# Receita
+receita_party = num_party * valor_party
+receita_jumper = num_jumper * valor_jumper
+receita_total = receita_party + receita_jumper
+lucro = receita_total - total_geral
+
+# Exibir resultados
+st.header("Resumo do Orçamento")
+st.subheader(":clipboard: Itens do Buffet")
+st.dataframe(buffet_df.rename(columns={"item": "Item", "qtde": "Quantidade", "custo": "Custo Unitário (R$)"}), use_container_width=True)
+
+st.subheader(":moneybag: Custos Extras")
+st.table(pd.DataFrame.from_dict(extras, orient='index', columns=["Valor (R$)"]))
+
+st.subheader(":bar_chart: Receita e Lucro")
+col1, col2, col3 = st.columns(3)
+col1.metric("Receita Total", f"R$ {receita_total:,.2f}")
+col2.metric("Custo Total", f"R$ {total_geral:,.2f}")
+col3.metric("Lucro Estimado", f"R$ {lucro:,.2f}", delta_color="normal")
+
+st.markdown("---")
+st.caption("Desenvolvido para Big Jump USA")
