@@ -110,4 +110,4 @@ if st.button("📄 Gerar PDF do orçamento"):
 
 st.markdown("---")
 st.caption("Desenvolvido para Big Jump USA")
-Atualiza app com geração de PDF estilizado
+
