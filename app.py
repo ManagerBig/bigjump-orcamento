@@ -4,6 +4,8 @@ import tempfile
 import os
 from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
+from reportlab.lib.utils import ImageReader
+from reportlab.lib import colors
 
 st.set_page_config(page_title="Orçamento de Aniversário - Big Jump", layout="centered")
 st.title("🎂 Orçamento de Festa de Aniversário - Big Jump")
@@ -59,19 +61,35 @@ st.markdown("---")
 st.subheader("💰 Valor Total")
 st.metric("Total a pagar", f"R$ {total:,.2f}")
 
-# Função para gerar PDF
+# Função para gerar PDF estilizado
 if st.button("📄 Gerar PDF do orçamento"):
     try:
+        logo_path = "Imagem do WhatsApp de 2025-07-01 à(s) 10.03.27_5a119f75.jpg"
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
             c = canvas.Canvas(tmpfile.name, pagesize=A4)
             width, height = A4
-
             y = height - 50
-            c.setFont("Helvetica-Bold", 16)
-            c.drawString(50, y, "Orçamento de Festa - Big Jump")
 
+            # Logo
+            try:
+                logo = ImageReader(logo_path)
+                c.drawImage(logo, width/2 - 60, y - 80, width=120, preserveAspectRatio=True, mask='auto')
+            except:
+                pass
+
+            y -= 120
+            c.setFillColor(colors.HexColor("#E63946"))
+            c.setFont("Helvetica-Bold", 16)
+            c.drawCentredString(width/2, y, "ORÇAMENTO DE FESTA - BIG JUMP USA")
+            y -= 20
+
+            # Linha
+            c.setStrokeColor(colors.black)
+            c.line(40, y, width - 40, y)
+            y -= 30
+
+            c.setFillColor(colors.black)
             c.setFont("Helvetica", 12)
-            y -= 40
             c.drawString(50, y, f"Data da festa: {data_evento.strftime('%d/%m/%Y')} ({dia_texto})")
             y -= 25
             c.drawString(50, y, f"Salão: {tipo_salao} - R$ {valor_salao:.2f}")
@@ -85,13 +103,20 @@ if st.button("📄 Gerar PDF do orçamento"):
             c.drawString(50, y, f"Tema: {tema}")
             y -= 25
             c.drawString(50, y, f"Desconto aplicado: R$ {valor_desconto:.2f}")
+
+            # Total
             y -= 40
             c.setFont("Helvetica-Bold", 14)
-            c.drawString(50, y, f"Valor Total: R$ {total:,.2f}")
+            c.setFillColor(colors.darkblue)
+            c.drawString(50, y, f"VALOR TOTAL: R$ {total:,.2f}")
 
+            # Observações
             y -= 60
             c.setFont("Helvetica-Oblique", 10)
-            c.drawString(50, y, "Desenvolvido para Big Jump USA")
+            c.setFillColor(colors.black)
+            c.drawString(50, y, "Observações: Este orçamento é válido por 5 dias úteis. Consulte disponibilidade de datas.")
+            y -= 30
+            c.drawString(50, y, "Big Jump USA agradece o seu contato!")
 
             c.save()
 
@@ -110,4 +135,3 @@ if st.button("📄 Gerar PDF do orçamento"):
 
 st.markdown("---")
 st.caption("Desenvolvido para Big Jump USA")
-
