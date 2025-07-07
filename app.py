@@ -6,9 +6,14 @@ from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
+import urllib.parse
 
 st.set_page_config(page_title="Orçamento de Aniversário - Big Jump", layout="centered")
 st.title("🎂 Orçamento de Festa de Aniversário - Big Jump")
+
+st.sidebar.header("Dados do Cliente")
+nome_cliente = st.sidebar.text_input("Nome do cliente")
+nome_aniversariante = st.sidebar.text_input("Nome do aniversariante")
 
 st.sidebar.header("Configurações da Festa")
 
@@ -22,7 +27,7 @@ else:
     dia_texto = "Final de semana (Sex a Dom)"
 
 # Escolha do salão
-tipo_salao = st.sidebar.selectbox("Escolha o salão:", ["California", "Chicago", "BeveelyHills"])
+tipo_salao = st.sidebar.selectbox("Escolha o salão:", ["California", "Chicago", "Bevelerels"])
 valores_saloes = {"California": 1.00, "Chicago": 1.00, "Bevelerels": 1.00}
 valor_salao = valores_saloes[tipo_salao]
 
@@ -49,6 +54,8 @@ total = valor_base + valor_salao + valor_buffet + valor_convidado + valor_pulant
 # Mostrar orçamento
 st.markdown("---")
 st.subheader("🧾 Resumo do Orçamento")
+st.write(f"**Cliente:** {nome_cliente}")
+st.write(f"**Aniversariante:** {nome_aniversariante}")
 st.write(f"**Data da festa:** {data_evento.strftime('%d/%m/%Y')} - {dia_texto} - R$ {valor_dia:.2f}")
 st.write(f"**Salão escolhido:** {tipo_salao} - R$ {valor_salao:.2f}")
 st.write(f"**Buffet:** {'Sim' if uso_buffet else 'Não'} - R$ {valor_buffet:.2f}")
@@ -64,7 +71,7 @@ st.metric("Total a pagar", f"R$ {total:,.2f}")
 # Função para gerar PDF estilizado
 if st.button("📄 Gerar PDF do orçamento"):
     try:
-        logo_path = "logo.jpg"
+        logo_path = "logo.png"
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as tmpfile:
             c = canvas.Canvas(tmpfile.name, pagesize=A4)
             width, height = A4
@@ -81,15 +88,13 @@ if st.button("📄 Gerar PDF do orçamento"):
             c.setFillColor(colors.HexColor("#E63946"))
             c.setFont("Helvetica-Bold", 16)
             c.drawCentredString(width/2, y, "ORÇAMENTO DE FESTA - BIG JUMP USA")
-            y -= 20
-
-            # Linha
-            c.setStrokeColor(colors.black)
-            c.line(40, y, width - 40, y)
             y -= 30
-
-            c.setFillColor(colors.black)
             c.setFont("Helvetica", 12)
+            c.setFillColor(colors.black)
+            c.drawString(50, y, f"Cliente: {nome_cliente}")
+            y -= 20
+            c.drawString(50, y, f"Aniversariante: {nome_aniversariante}")
+            y -= 25
             c.drawString(50, y, f"Data da festa: {data_evento.strftime('%d/%m/%Y')} ({dia_texto})")
             y -= 25
             c.drawString(50, y, f"Salão: {tipo_salao} - R$ {valor_salao:.2f}")
@@ -104,13 +109,11 @@ if st.button("📄 Gerar PDF do orçamento"):
             y -= 25
             c.drawString(50, y, f"Desconto aplicado: R$ {valor_desconto:.2f}")
 
-            # Total
             y -= 40
             c.setFont("Helvetica-Bold", 14)
             c.setFillColor(colors.darkblue)
             c.drawString(50, y, f"VALOR TOTAL: R$ {total:,.2f}")
 
-            # Observações
             y -= 60
             c.setFont("Helvetica-Oblique", 10)
             c.setFillColor(colors.black)
@@ -133,5 +136,26 @@ if st.button("📄 Gerar PDF do orçamento"):
     except Exception as e:
         st.error(f"Erro ao gerar PDF: {e}")
 
+# Enviar WhatsApp
+st.markdown("---")
+st.subheader("📲 Enviar pelo WhatsApp")
+
+mensagem = f"Olá, aqui está o orçamento da festa para {nome_aniversariante}:\n" \
+           f"Cliente: {nome_cliente}\n" \
+           f"Data: {data_evento.strftime('%d/%m/%Y')} ({dia_texto})\n" \
+           f"Salão: {tipo_salao}\n" \
+           f"Buffet: {'Sim' if uso_buffet else 'Não'}\n" \
+           f"Convidados: {num_convidados}\n" \
+           f"Pulantes: {num_pulantes} (Cortesia: {cortesia_pulantes})\n" \
+           f"Tema: {tema}\n" \
+           f"Desconto: R$ {valor_desconto:.2f}\n" \
+           f"Total: R$ {total:,.2f}"
+
+numero = st.text_input("Número de WhatsApp (somente números com DDD, ex: 11999998888)")
+if st.button("📤 Enviar orçamento pelo WhatsApp") and numero:
+    url = f"https://wa.me/{numero}?text={urllib.parse.quote(mensagem)}"
+    st.markdown(f"[Clique aqui para enviar 📲]({url})", unsafe_allow_html=True)
+
 st.markdown("---")
 st.caption("Desenvolvido para Big Jump USA")
+
