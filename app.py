@@ -7,6 +7,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.utils import ImageReader
 from reportlab.lib import colors
 import urllib.parse
+import csv
 
 st.set_page_config(page_title="Orçamento de Aniversário - Big Jump", layout="centered")
 st.title("🎂 Orçamento de Festa de Aniversário - Big Jump")
@@ -62,13 +63,14 @@ st.write(f"**Buffet:** {'Sim' if uso_buffet else 'Não'} - R$ {valor_buffet:.2f}
 st.write(f"**Convidados:** {num_convidados} - R$ {valor_convidado:.2f}")
 st.write(f"**Pulantes:** {num_pulantes} ({cortesia_pulantes} cortesia) - R$ {valor_pulantes:.2f}")
 st.write(f"**Tema da Festa:** {tema}")
-st.write(f"**Desconto aplicado:** R$ {valor_desconto:.2f}")
+if valor_desconto > 0:
+    st.write(f"**Desconto aplicado:** R$ {valor_desconto:.2f}")
 
 st.markdown("---")
 st.subheader("💰 Valor Total")
 st.metric("Total a pagar", f"R$ {total:,.2f}")
 
-# Função para gerar PDF estilizado
+# Gerar PDF estilizado
 if st.button("📄 Gerar PDF do orçamento"):
     try:
         logo_path = "logo.png"
@@ -77,7 +79,6 @@ if st.button("📄 Gerar PDF do orçamento"):
             width, height = A4
             y = height - 50
 
-            # Logo
             try:
                 logo = ImageReader(logo_path)
                 c.drawImage(logo, width/2 - 60, y - 80, width=120, preserveAspectRatio=True, mask='auto')
@@ -106,21 +107,20 @@ if st.button("📄 Gerar PDF do orçamento"):
             c.drawString(50, y, f"Pulantes: {num_pulantes} (Cortesia: {cortesia_pulantes}) - R$ {valor_pulantes:.2f}")
             y -= 25
             c.drawString(50, y, f"Tema: {tema}")
-            y -= 25
-            c.drawString(50, y, f"Desconto aplicado: R$ {valor_desconto:.2f}")
+            if valor_desconto > 0:
+                y -= 25
+                c.drawString(50, y, f"Desconto aplicado: R$ {valor_desconto:.2f}")
 
             y -= 40
             c.setFont("Helvetica-Bold", 14)
             c.setFillColor(colors.darkblue)
             c.drawString(50, y, f"VALOR TOTAL: R$ {total:,.2f}")
-
             y -= 60
             c.setFont("Helvetica-Oblique", 10)
             c.setFillColor(colors.black)
             c.drawString(50, y, "Observações: Este orçamento é válido por 5 dias úteis. Consulte disponibilidade de datas.")
             y -= 30
             c.drawString(50, y, "Big Jump USA agradece o seu contato!")
-
             c.save()
 
         with open(tmpfile.name, "rb") as f:
@@ -130,7 +130,6 @@ if st.button("📄 Gerar PDF do orçamento"):
                 file_name="orcamento_bigjump.pdf",
                 mime="application/pdf"
             )
-
         os.remove(tmpfile.name)
 
     except Exception as e:
@@ -147,15 +146,45 @@ mensagem = f"Olá, aqui está o orçamento da festa para {nome_aniversariante}:\
            f"Buffet: {'Sim' if uso_buffet else 'Não'}\n" \
            f"Convidados: {num_convidados}\n" \
            f"Pulantes: {num_pulantes} (Cortesia: {cortesia_pulantes})\n" \
-           f"Tema: {tema}\n" \
-           f"Desconto: R$ {valor_desconto:.2f}\n" \
-           f"Total: R$ {total:,.2f}"
+           f"Tema: {tema}\n"
+if valor_desconto > 0:
+    mensagem += f"Desconto: R$ {valor_desconto:.2f}\n"
+mensagem += f"Total: R$ {total:,.2f}"
 
 numero = st.text_input("Número de WhatsApp (somente números com DDD, ex: 11999998888)")
 if st.button("📤 Enviar orçamento pelo WhatsApp") and numero:
     url = f"https://wa.me/{numero}?text={urllib.parse.quote(mensagem)}"
     st.markdown(f"[Clique aqui para enviar 📲]({url})", unsafe_allow_html=True)
 
+# Salvar orçamento em CSV
+st.markdown("---")
+st.subheader("🗂️ Salvar Orçamento")
+
+if st.button("💾 Salvar orçamento em arquivo CSV"):
+    dados = [
+        nome_cliente, nome_aniversariante, data_evento.strftime('%d/%m/%Y'),
+        tipo_salao, uso_buffet, tema, num_convidados, num_pulantes,
+        cortesia_pulantes, valor_desconto, total
+    ]
+
+    cabecalho = [
+        "Cliente", "Aniversariante", "Data da Festa", "Salão", "Buffet", "Tema",
+        "Convidados", "Pulantes", "Cortesia Pulantes", "Desconto", "Total"
+    ]
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".csv", mode="w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(cabecalho)
+        writer.writerow(dados)
+
+    with open(csvfile.name, "rb") as f:
+        st.download_button(
+            label="📥 Baixar arquivo CSV",
+            data=f,
+            file_name="orcamento_bigjump.csv",
+            mime="text/csv"
+        )
+    os.remove(csvfile.name)
+
 st.markdown("---")
 st.caption("Desenvolvido para Big Jump USA")
-
