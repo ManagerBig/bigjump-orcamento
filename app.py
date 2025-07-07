@@ -38,13 +38,13 @@ valor_buffet = 120.00 if uso_buffet else 0.00
 
 # Tema e convidados
 tema = st.sidebar.selectbox("Tema da festa", ["Laser Tag", "Big Jump", "Frozen", "Super Heróis", "Minions", "Minecraft", "Patrulha Canina"])
-num_convidados = st.sidebar.number_input("Número de convidados (R$1 por convidado)", min_value=0, value=10)
-valor_convidado = num_convidados * 1.00
+num_convidados = st.sidebar.number_input("Número de convidados (R$120 por convidado)", min_value=0, value=10)
+valor_convidado = num_convidados * 120.00
 
 # Pulantes e cortesia
 num_pulantes = st.sidebar.number_input("Número de convidados que vão pular (R$1 por pessoa)", min_value=0, value=5)
 cortesia_pulantes = st.sidebar.number_input("Quantidade de cortesia para pulantes", min_value=0, max_value=num_pulantes, value=0)
-valor_pulantes = max(0, num_pulantes - cortesia_pulantes) * 1.00
+valor_pulantes = max(0, num_pulantes - cortesia_pulantes) * 135.00
 
 # Valor base + desconto
 valor_base = 500.00
