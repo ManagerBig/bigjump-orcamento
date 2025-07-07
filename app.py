@@ -22,7 +22,7 @@ else:
     dia_texto = "Final de semana (Sex a Dom)"
 
 # Escolha do salão
-tipo_salao = st.sidebar.selectbox("Escolha o salão:", ["California", "Chicago", "Bevelerels"])
+tipo_salao = st.sidebar.selectbox("Escolha o salão:", ["California", "Chicago", "BeveelyHills"])
 valores_saloes = {"California": 1.00, "Chicago": 1.00, "Bevelerels": 1.00}
 valor_salao = valores_saloes[tipo_salao]
 
