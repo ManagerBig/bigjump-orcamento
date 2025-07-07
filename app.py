@@ -21,20 +21,20 @@ st.sidebar.header("Configurações da Festa")
 # Data do evento para ajustar valor por dia da semana
 data_evento = st.sidebar.date_input("Escolha a data da festa", value=datetime.date.today())
 if data_evento.weekday() < 4:
-    valor_dia = 1.00
+    valor_dia = 100.00
     dia_texto = "Dia de semana (Seg a Qui)"
 else:
-    valor_dia = 2.00
+    valor_dia = 300.00
     dia_texto = "Final de semana (Sex a Dom)"
 
 # Escolha do salão
 tipo_salao = st.sidebar.selectbox("Escolha o salão:", ["California", "Chicago", "Bevelerels"])
-valores_saloes = {"California": 1.00, "Chicago": 1.00, "Bevelerels": 1.00}
+valores_saloes = {"California": 1500.00, "Chicago": 1200.00, "Bevelerels": 1700.00}
 valor_salao = valores_saloes[tipo_salao]
 
 # Buffet (opcional)
 uso_buffet = st.sidebar.checkbox("Incluir buffet?", value=False)
-valor_buffet = 1.00 if uso_buffet else 0.00
+valor_buffet = 120.00 if uso_buffet else 0.00
 
 # Tema e convidados
 tema = st.sidebar.selectbox("Tema da festa", ["Laser Tag", "Big Jump", "Frozen", "Super Heróis", "Minions", "Minecraft", "Patrulha Canina"])
